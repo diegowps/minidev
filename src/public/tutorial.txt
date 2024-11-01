@@ -1,0 +1,31 @@
+Electron tutorial
+
+Documentação:
+https://www.electronjs.org/pt/docs/latest/
+
+Material de apoio:
+@ProfessorJosedeAssis (youtube - playlist electron tutorial)
+
+
+MVC - Arquitetura de modelo de camadas usado em sistemas WEB Full Stack (front-end | back-end)
+Model
+View
+Controller
+
+Views ------- Controller ------- Models (banco de dados)
+
+Estrutura de pastas
+
+src
+|__ main.js
+|__ preload.js
+|
+|____ views --- index.html
+|
+|____ models
+|
+|____ public
+       |___ css --- style.css
+       |___ js
+       |___ img
+       |___ docs
