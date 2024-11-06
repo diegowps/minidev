@@ -186,7 +186,7 @@ const template = [
         submenu: [
             {
                 label: 'Repositório',
-                click: () => shell.openExternal('https://github.com/amanda-nogueira')
+                click: () => shell.openExternal('https://github.com/diegowps')
             },
             {
                 label: 'Sobre',
