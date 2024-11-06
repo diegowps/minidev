@@ -1,2 +1,2 @@
 # minidev
-mini editor de código eléctron
+Mini editor de código usando o framework Electron
