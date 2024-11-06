@@ -210,3 +210,115 @@ function novoArquivo(){
     win.webContents.send('set-file', file)
 }
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+
+
+
+
+
+// Abrir arquivo >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+// salvar e salvar como >>>>>>>>>>>>>>>>>>>>>>>>>>>>
+// 3 funções 1) salvar 2) salvar como 3) salvar arquivo
+async 
+function salvarComo(){
+    let dialogFile = await dialog.showSaveDialog({
+        defaultPath: file.path,
+        filters: [
+            { name: 'Arquivos de texto', extensions: ['txt', 'text', 'md', 'markdown'] }
+        ]
+    })
+
+}
+function salvar(){
+    if(file.saved){
+        salvarArquivo(file.path)
+    } else {
+        salvarComo()
+    }
+function salvarArquivo(filePath){
+    try{
+        //biblioteca fs para salvar aquivo
+        fstat.write(filePath, file.content, (error) => {
+            if(error) throw error
+            file.saved = true
+            file.path = filePath
+            file.name = path.basename(filePath)
+            win.webContents.send('set-file', file)
+        }
+    } catch (error){
+    console.log(error) {
+
+    }
+
+    }
+
+
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
