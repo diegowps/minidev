@@ -1,28 +1,23 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hello Electron</title>
+    <!-- Evitar ataques de injeção de código malicioso -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'">
+    <title>Mini Dev Editor</title>
+    <link rel="stylesheet" href="../public/css/style.css">
 </head>
-<body>
-    <h1>Hello Electron</h1>
-    <!--editor de codigo -->
-    <!-- spellcheck="false" desativa a verificação ortografica  -->
-<textarea id="txtArea" style="width: 100%; spellcheck="false"></textarea> height: 100vh;">
-    <script>
-        // require é uma função do node.js que permite importar módulos
-        const { ipcRenderer } = require('electron');
-        const txtArea = document.getElementById('txtArea');
-        // Envia uma mensagem para o processo principal
-        ipcRenderer.send('message', 'Hello from the renderer process');
-        // Recebe uma mensagem do processo principal
-        ipcRenderer.on('reply', (event, arg) => {
-            txtArea.value = arg;
-        });
-    </script>
-    <div class="container button">
-    <img>
 
+<body>
+    <!-- Numeração de linhas -->
+    <div id="linhas"></div>
+    <!-- Editor de código -->
+    <!-- spellcheck="false" desativa a verificação ortográfica -->
+    <textarea id="txtArea" spellcheck="false"></textarea>
+    <!-- Processo de renderização -->
+    <script src="renderer.js"></script>
 </body>
+
 </html>
