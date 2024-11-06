@@ -1,71 +1,59 @@
-console.log("Processo principal")
-
-// importação de pacotes (bibliotecas)
-// nativeTheme (forçar um tema no sistema operacional)
-// Menu (criar um menu personalizado)
-// shell (acessar links externos)
+//importação de pacotes
 const { app, BrowserWindow, nativeTheme, Menu, shell, ipcMain } = require('electron/main')
 const path = require('node:path')
 
-// janela principal
-let win //Importante! Neste projeto o escopo da variável win deve ser global
+//Janela principal
+let win //Importante! Neste projeto o escopo da variável win deve ser global.
 function createWindow() {
     nativeTheme.themeSource = 'dark' //janela sempre escura
     win = new BrowserWindow({
-        width: 1010, //largura em px
-        height: 720, //altura em px
+        width: 1010, //largura em pixels
+        height: 700, //altura em px
         webPreferences: {
             preload: path.join(__dirname, 'preload.js')
         }
     })
-
-    // Menu personalizado
+    //Menu personalizado
     Menu.setApplicationMenu(Menu.buildFromTemplate(template))
-
     win.loadFile('./src/views/index.html')
 }
 
-// Janela sobre
-function aboutWindow() {
+//Janela sobre
+function aboutWindow(){
     nativeTheme.themeSource = 'dark'
-    // a linha abaixo obtem a janela principal
-    const main = BrowserWindow.getFocusedWindow()
-    let about
+    const main = BrowserWindow.getFocusedWindow() // obtém a janela principal
+    let about 
     // validar a janela pai
-    if (main) {
+    if(main){
         about = new BrowserWindow({
             width: 320,
             height: 160,
-            autoHideMenuBar: true, //esconder o menu
-            resizable: false, // impedir redimensionamento
+            autoHideMenuBar: true, // esconde o menu
+            resizable: false, //impedir redimensionamento
             minimizable: false, // impedir minimizar a janela
-            //titleBarStyle: 'hidden' //esconder a barra de estilo(ex: totem de auto atendimento)
-            parent: main, //estabelecer uma hierarquia de janelas
-            modal: true,
+            //titleBarStyle: 'hidden' // esconder a barra de estilo (ex.: totem de auto atendimento)
+            parent: main, //estabelece hierarquia de janelas
+            modal:true,
             webPreferences: {
                 preload: path.join(__dirname, 'preload.js')
             }
         })
     }
-
     about.loadFile('./src/views/sobre.html')
-
-    // fechar a janela quando receber mensagem do processo de renderização.
+    //Fechar a janela quando receber mensagem do processo do processo de renderização.
     ipcMain.on('close-about', () => {
-        console.log("Recebi a mensagem close-about")
-        // validar se a janela foi destruída
-        if (about && !about.isDestroyed()) {
+        console.log('Recebi a mensagem close-about')
+        //validar se a janela foi destruída
+        if(about && !about.isDestroyed()){
             about.close()
         }
     })
-
 }
 
-// execução assíncrona do aplicativo electron
+//execução assíncrona do aplicativo electron
 app.whenReady().then(() => {
     createWindow()
-
-    // comportamento do MAC ao fechar uma janela
+    //comportamento do MAC ao fechar uma janela
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) {
             createWindow()
@@ -73,21 +61,22 @@ app.whenReady().then(() => {
     })
 })
 
-// encerrar a aplicação quando a janela for fechada (Windows e Linux)
+// Encerrar a aplicação quando a janela for fechada (Windows e Linux)
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         app.quit()
     }
 })
 
-// template do menu
+//template do menu
 const template = [
     {
         label: 'Arquivo',
         submenu: [
             {
                 label: 'Novo',
-                accelerator: 'CmdOrCtrl+N'
+                accelerator: 'CmdOrCtrl+N',
+                click: () => novoArquivo()
             },
             {
                 label: 'Abrir',
@@ -136,7 +125,7 @@ const template = [
             {
                 label: 'Colar',
                 role: 'paste'
-            },
+            }
         ]
     },
     {
@@ -147,41 +136,48 @@ const template = [
                 role: 'zoomIn'
             },
             {
-                label: 'Reduzir',
+                label: 'Reduzir zoom',
                 role: 'zoomOut'
             },
             {
                 label: 'Restaurar o zoom padrão',
                 role: 'resetZoom'
-            }
+            },
         ]
     },
     {
         label: 'Cor',
         submenu: [
             {
-                label: 'Amarelo'
+                label: 'Amarelo',
+                click: () => win.webContents.send('set-color', "var(--amarelo)")
             },
             {
-                label: 'Azul'
+                label: 'Azul',
+                click: () => win.webContents.send('set-color', "var(--azul)")
             },
             {
-                label: 'Laranja'
+                label: 'Laranja',
+                click: () => win.webContents.send('set-color', "var(--laranja)")
             },
             {
-                label: 'Pink'
+                label: 'Pink',
+                click: () => win.webContents.send('set-color', "var(--pink)")
             },
             {
-                label: 'Roxo'
+                label: 'Roxo',
+                click: () => win.webContents.send('set-color', "var(--roxo)")
             },
             {
-                label: 'Verde'
+                label: 'Verde',
+                click: () => win.webContents.send('set-color', "var(--verde)")
             },
             {
                 type: 'separator'
             },
             {
-                label: 'Restaurar a cor padrão'
+                label: 'Restaurar a cor padrão',
+                click: () => win.webContents.send('set-color', 'var(--cinzaClaro)')
             }
         ]
     },
@@ -190,7 +186,7 @@ const template = [
         submenu: [
             {
                 label: 'Repositório',
-                click: () => shell.openExternal('https://github.com/professorjosedeassis/minidev')
+                click: () => shell.openExternal('https://github.com/amanda-nogueira')
             },
             {
                 label: 'Sobre',
@@ -200,63 +196,17 @@ const template = [
     }
 ]
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function lerArquivo(filePath) {
-//usar a trycath sempre com arquivos
-try {
-    //importar a biblioteca fs
-    return fs.readFileSync(filePath, 'utf-8')
-    //ler o arquivo
-    const data = fs.readFileSync(filePath, 'utf-8')
-    //retornar o conteúdo do arquivo
-    return data
+//Novo arquivo >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+//1º Criar a estrutura de um arquivo e setar o título
+//Um arquivo inicia sem título, sem conteúdo, não está salvo e o local padrão vai ser a pasta documentos.
+function novoArquivo(){
+    file = {
+        name: 'Sem título',
+        content: "",
+        saved: false,
+        path: app.getPath('documents') + 'Sem título'
+    }
+    //enviar ao renderizador a estrutura de um novo arquivo e título
+    win.webContents.send('set-file', file)
 }
-catch (error) {
-    console.log('Erro ao ler o arquivo') //exibir erro
-    //retornar erro
-    return ''
-}
-} //fim da função lerArquivo
-
-
-
-
-
-
-
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
