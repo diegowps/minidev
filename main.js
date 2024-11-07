@@ -1,9 +1,18 @@
 //importação de pacotes
-const { app, BrowserWindow, nativeTheme, Menu, shell, ipcMain } = require('electron/main')
+//nativeTheme (força um tema no sistema operacional)
+//
+const { app, BrowserWindow, nativeTheme, Menu, shell, ipcMain, dialog } = require('electron/main')
 const path = require('node:path')
 
+//Importação da biblioteca file system (nativa do JS) para manipular arquivos
+const fs = require('fs')
+const { error } = require('node:console')
+let file = {}
+
+//Criação de um objeto com a estrutura básica de um arquivo
 //Janela principal
 let win //Importante! Neste projeto o escopo da variável win deve ser global.
+
 function createWindow() {
     nativeTheme.themeSource = 'dark' //janela sempre escura
     win = new BrowserWindow({
@@ -19,12 +28,12 @@ function createWindow() {
 }
 
 //Janela sobre
-function aboutWindow(){
+function aboutWindow() {
     nativeTheme.themeSource = 'dark'
     const main = BrowserWindow.getFocusedWindow() // obtém a janela principal
-    let about 
+    let about
     // validar a janela pai
-    if(main){
+    if (main) {
         about = new BrowserWindow({
             width: 320,
             height: 160,
@@ -33,7 +42,7 @@ function aboutWindow(){
             minimizable: false, // impedir minimizar a janela
             //titleBarStyle: 'hidden' // esconder a barra de estilo (ex.: totem de auto atendimento)
             parent: main, //estabelece hierarquia de janelas
-            modal:true,
+            modal: true,
             webPreferences: {
                 preload: path.join(__dirname, 'preload.js')
             }
@@ -44,7 +53,7 @@ function aboutWindow(){
     ipcMain.on('close-about', () => {
         console.log('Recebi a mensagem close-about')
         //validar se a janela foi destruída
-        if(about && !about.isDestroyed()){
+        if (about && !about.isDestroyed()) {
             about.close()
         }
     })
@@ -80,15 +89,18 @@ const template = [
             },
             {
                 label: 'Abrir',
-                accelerator: 'CmdOrCtrl+O'
+                accelerator: 'CmdOrCtrl+O',
+                click: () => abrirArquivo()
             },
             {
                 label: 'Salvar',
-                accelerator: 'CmdOrCtrl+S'
+                accelerator: 'CmdOrCtrl+S',
+                click: () => salvar()
             },
             {
                 label: 'Salvar Como',
-                accelerator: 'CmdOrCtrl+Shift+S'
+                accelerator: 'CmdOrCtrl+Shift+S',
+                click: () => salvarComo()
             },
             {
                 type: 'separator'
@@ -186,7 +198,7 @@ const template = [
         submenu: [
             {
                 label: 'Repositório',
-                click: () => shell.openExternal('https://github.com/diegowps')
+                click: () => shell.openExternal('https://github.com/amanda-nogueira')
             },
             {
                 label: 'Sobre',
@@ -199,7 +211,7 @@ const template = [
 //Novo arquivo >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 //1º Criar a estrutura de um arquivo e setar o título
 //Um arquivo inicia sem título, sem conteúdo, não está salvo e o local padrão vai ser a pasta documentos.
-function novoArquivo(){
+function novoArquivo() {
     file = {
         name: 'Sem título',
         content: "",
@@ -211,114 +223,78 @@ function novoArquivo(){
 }
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-
-
-
-
-
-
-// Abrir arquivo >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-
-// salvar e salvar como >>>>>>>>>>>>>>>>>>>>>>>>>>>>
-// 3 funções 1) salvar 2) salvar como 3) salvar arquivo
-async 
-function salvarComo(){
-    let dialogFile = await dialog.showSaveDialog({
-        defaultPath: file.path,
-        filters: [
-            { name: 'Arquivos de texto', extensions: ['txt', 'text', 'md', 'markdown'] }
-        ]
+//Abrir arquivo ------------------------------------------------
+// 2 funções, abrirArquivo() e lerArquivo(caminho) 
+async function abrirArquivo() {
+    //Usar um módeulo do Electron para abrir o explorador de arquivos
+    let dialogFile = await dialog.showOpenDialog({
+        defaultPath: file.path //Selecionar o arquivo no local padrão
     })
-
-}
-function salvar(){
-    if(file.saved){
-        salvarArquivo(file.path)
+    //console.log(dialogFile) vendo caminho das pasta de arquivos solicitados
+    //Validação do botão [cancelar]
+    if (dialogFile.canceled === true) {
+        return false
     } else {
-        salvarComo()
-    }
-function salvarArquivo(filePath){
-    try{
-        //biblioteca fs para salvar aquivo
-        fstat.write(filePath, file.content, (error) => {
-            if(error) throw error
-            file.saved = true
-            file.path = filePath
-            file.name = path.basename(filePath)
-            win.webContents.send('set-file', file)
+        //Abrir arquivo
+        file = {
+            name: path.basename(dialogFile.filePaths[0]),
+            content: lerArquivo(dialogFile.filePaths[0]),
+            saved: true,
+            path: dialogFile.filePaths[0]
         }
-    } catch (error){
-    console.log(error) {
+        //console.log(file)
+        //Enviar o arquivo para o renderer
+        win.webContents.send('set-file', file)
+    }
+}
+
+function lerArquivo(filePath) {
+    //Usar o trycatch sempre que trabalhar com arquivos
+    try {
+        //A linha abaixo usa a biblioteca fs para ler um aqruivo, informando o caminho e o encoding do arquivo.
+        return fs.readFileSync(filePath, 'utf-8')
+    } catch (error) {
+        console.log(error)
+        return ''
+    }
+}
+//----------------------------------------------------------------------------
+
+//Salvar **************************************************************
+//3 funções, salvarComo() e salvar() e salvarArquivo(fs)
+async function salvarComo() {
+    let dialogFile = await dialog.showSaveDialog({
+        defaultPath: file.path
+    })
+    //console.log(dialogFile)
+    if (dialogFile.canceled === true) {
+        return false
+    } else {
+        salvarArquivo(dialogFile.filePath)
+    }
+
+
+    function salvar() {
+        if (file.saved === true) {
+            return salvarArquivo(file.path)
+        } else {
+            return salvarComo()
+        }
 
     }
 
+
+    function salvarArquivo(filePath) {
+        try {
+            //Uso da biblioteca fs para gravar um arquivo
+            fs.write(filePath, file.content, (error) => {
+                file.path = filePath
+                file.saved = true
+                file.name = path.basename(filePath)
+            })
+        } catch (error) {
+            console.log(error)
+        }
     }
-
-
-//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+}    
+//*********************************************
